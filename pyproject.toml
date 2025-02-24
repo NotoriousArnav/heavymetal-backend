@@ -1,11 +1,16 @@
 [project]
 name = "heavymetal"
-version = "0.1.0"
-description = "Add your description here"
+version = "0"
+description = "Backend for the heavymetal music streaming service"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "argon2-cffi>=23.1.0",
     "fastapi>=0.115.8",
+    "python-dotenv>=1.0.1",
     "sqlalchemy>=2.0.38",
     "uvicorn>=0.34.0",
 ]
+
+[project.scripts]
+heavymetal = "heavymetal.main:app"
