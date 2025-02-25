@@ -36,7 +36,7 @@ async def login(request: LoginRequest):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me")
+@router.get("/profile")
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return {"username": current_user.name}
 
