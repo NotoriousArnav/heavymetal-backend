@@ -7,7 +7,6 @@ app = FastAPI(
     title="HeavyMetal Backend",
     description="Backend for HeavyMetal Music Streaming Service",
     port=8080,
-    tags=["General Purpose APIs", "Auth", "Users", "Public"],
 )
 
 app.add_middleware(

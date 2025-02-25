@@ -5,7 +5,7 @@ from utils import get_user, verify_password, get_password_hash
 from datetime import datetime, timedelta
 from jose import jwt
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
 
 class OAuth2RequestForm(BaseModel):
     grant_type: str
