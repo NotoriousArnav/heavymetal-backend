@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db import get_db, Audio, Track
-from schemas import Track, User
+from schemas import Track, User, TokenData
 from security import authenticate_user, create_access_token
 from jwt import decode, DecodeError
 from security import SECRET_KEY, ALGORITHM
