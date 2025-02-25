@@ -1,0 +1,51 @@
+interfaces = []
+exclude = [
+    "**/*__pycache__",
+    "**/*egg-info",
+    "**/docs",
+    "**/tests",
+    "**/venv",
+]
+source_roots = [
+    ".",
+]
+
+[[modules ]]
+path = "db_builder"
+depends_on = ["db", "schemas"]
+
+[[modules ]]
+path = "security"
+depends_on = ["oauth2", "db", "utils"]
+
+[[modules ]]
+path = "__main__"
+depends_on = ["db"]
+
+[[modules ]]
+path = "routes"
+depends_on = ["routes.auth"]
+
+[[modules ]]
+path = "schemas"
+depends_on = []
+
+[[modules ]]
+path = "main"
+depends_on = ["routes"]
+
+[[modules ]]
+path = "oauth2"
+depends_on = ["utils"]
+
+[[modules ]]
+path = "routes.auth"
+depends_on = ["utils", "oauth2", "security", "db"]
+
+[[modules ]]
+path = "db"
+depends_on = []
+
+[[modules ]]
+path = "utils"
+depends_on = ["db"]

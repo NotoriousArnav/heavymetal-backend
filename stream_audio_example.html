@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Secure Audio Streaming Test</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form id="login-form">
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+
+    <h2>Audio Player</h2>
+    <audio id="audio-player" controls>
+        Your browser does not support the audio element.
+    </audio>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                // Send login request to obtain JWT token
+                const loginResponse = await fetch('http://127.0.0.1:8080/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password }),
+                });
+
+                if (!loginResponse.ok) {
+                    throw new Error('Login failed');
+                }
+
+                const loginData = await loginResponse.json();
+                const token = loginData.access_token;
+
+                // Fetch the audio file with the obtained token
+                const audioResponse = await fetch('http://127.0.0.1:8080/api/v1/songs/stream/3b14f63b-3847-4bfe-8cc8-89a6d73a4126', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+
+                if (!audioResponse.ok) {
+                    throw new Error('Failed to fetch audio');
+                }
+
+                const audioBlob = await audioResponse.blob();
+                const audioUrl = URL.createObjectURL(audioBlob);
+
+                // Set the audio source and play
+                const audioElement = document.getElementById('audio-player');
+                audioElement.src = audioUrl;
+                audioElement.play();
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+    </script>
+</body>
+</html>
+

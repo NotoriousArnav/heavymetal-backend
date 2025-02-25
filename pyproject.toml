@@ -19,3 +19,8 @@ dependencies = [
 
 [project.scripts]
 heavymetal = "heavymetal.main:app"
+
+[dependency-groups]
+dev = [
+    "tach>=0.26.1",
+]
