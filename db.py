@@ -2,7 +2,7 @@
 Database Controller to make sure that Database is connected and switching is easier as well.
 """
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os, uuid, dotenv
@@ -41,6 +41,8 @@ class User(Base):
         )
     name = Column(String, index=True) # username
     hashed_password = Column(String)
+    is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=False)
 
 class Audio(Base):
     __tablename__ = "audio"
