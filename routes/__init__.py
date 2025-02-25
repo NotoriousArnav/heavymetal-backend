@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from .auth import router as auth_router
+from .songs import router as songs_router
 
 router = APIRouter(
     prefix="/api/v1",
@@ -17,3 +18,4 @@ router = APIRouter(
 )
 
 router.include_router(auth_router)
+router.include_router(songs_router)
