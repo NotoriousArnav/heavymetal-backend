@@ -12,11 +12,15 @@ wheels/
 .env
 
 # Logs folder
+logs/
+*.log
 
 # Databases
 db.sqlite3
 db.sqlite3-journal
 test.db
 
+# uvicorn logs
+uvicorn.log
 
 .aider*
