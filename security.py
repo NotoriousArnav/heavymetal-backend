@@ -6,6 +6,7 @@ from fastapi import Depends
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from fastapi import HTTPException
+from oauth2 import oauth2_scheme, authenticate_user_oauth2, create_access_token_oauth2
 
 hasher = PasswordHasher()
 
@@ -66,3 +67,22 @@ def get_current_active_superuser(current_user: User = Depends(get_current_active
     if not current_user.is_superuser:
         raise HTTPException(status_code=400, detail="Not a superuser")
     return current_user
+
+def get_current_user_oauth2(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, "secret_key", algorithms=["HS256"])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = username
+    except JWTError:
+        raise credentials_exception
+    user = get_user(username=token_data)
+    if user is None:
+        raise credentials_exception
+    return user
