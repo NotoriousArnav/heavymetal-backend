@@ -3,6 +3,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from security import authenticate_user, create_access_token, get_current_user, get_current_active_user, get_current_active_superuser
 from datetime import timedelta
+from db import User  # Import User from db
 
 router = APIRouter(
     prefix="/auth",
