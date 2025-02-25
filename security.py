@@ -38,8 +38,12 @@ def authenticate_user(username: str, password: str):
         return False
     return user
 
-def get_current_user(token: str = Depends()):
-    credentials_exception = HTTPBearer()
+def get_current_user(token: str = Depends(HTTPBearer())):
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
         payload = jwt.decode(token, "secret_key", algorithms=["HS256"])
         username: str = payload.get("sub")
