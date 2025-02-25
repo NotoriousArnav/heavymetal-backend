@@ -9,7 +9,7 @@ from db import get_db, Audio, Track
 from schemas import Track
 
 router = APIRouter(
-    prefix="/api/v1/songs",
+    prefix="/songs",
     responses={
         404: {
                 "description":"Not found"
@@ -21,6 +21,7 @@ router = APIRouter(
                 "description":"Bad Request"
             },
         },
+    tags=["Songs"],
 )
 
 class SongRequest(BaseModel):
