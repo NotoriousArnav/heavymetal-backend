@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from fastapi import HTTPException
 from utils import get_user, verify_password, get_password_hash
 from oauth2 import oauth2_scheme, authenticate_user_oauth2, create_access_token_oauth2
+from db import User
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
