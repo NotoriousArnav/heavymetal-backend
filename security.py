@@ -1,25 +1,10 @@
-from argon2 import PasswordHasher
-from db import SessionLocal, User
-from schemas import *
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from fastapi import HTTPException
+from utils import get_user, verify_password, get_password_hash
 from oauth2 import oauth2_scheme, authenticate_user_oauth2, create_access_token_oauth2
-
-hasher = PasswordHasher()
-
-def get_user(username: str):
-    db = SessionLocal()
-    user = db.query(User).filter(User.name == username).first()
-    return user
-
-def verify_password(plain_password, hashed_password):
-    return hasher.verify(hashed_password, plain_password)
-
-def get_password_hash(password):
-    return hasher.hash(password)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()

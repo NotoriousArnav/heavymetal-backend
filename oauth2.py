@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import BaseModel
-from security import get_user, verify_password, get_password_hash
-from datetime import datetime, timedelta
+from utils import get_user, verify_password, get_password_hash
+from datetime import timedelta
 from jose import jwt
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
