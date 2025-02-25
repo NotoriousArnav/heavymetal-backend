@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
 from security import get_user, verify_password, create_access_token, get_current_user
+from datetime import timedelta
 
 router = APIRouter(
     prefix="/auth",
