@@ -7,6 +7,9 @@ from utils import get_user, verify_password, get_password_hash
 from oauth2 import oauth2_scheme, authenticate_user_oauth2, create_access_token_oauth2
 from db import User
 
+SECRET_KEY = "secret_key"
+ALGORITHM = "HS256"
+
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
     if expires_delta:
@@ -14,7 +17,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.utcnow() + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, "secret_key", algorithm="HS256")
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 def authenticate_user(username: str, password: str):
@@ -25,14 +28,14 @@ def authenticate_user(username: str, password: str):
         return False
     return user
 
-def get_current_user(token: str = Depends(HTTPBearer())):
+def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=401,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, "secret_key", algorithms=["HS256"])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -53,22 +56,3 @@ def get_current_active_superuser(current_user: User = Depends(get_current_active
     if not current_user.is_superuser:
         raise HTTPException(status_code=400, detail="Not a superuser")
     return current_user
-
-def get_current_user_oauth2(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, "secret_key", algorithms=["HS256"])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = username
-    except JWTError:
-        raise credentials_exception
-    user = get_user(username=token_data)
-    if user is None:
-        raise credentials_exception
-    return user

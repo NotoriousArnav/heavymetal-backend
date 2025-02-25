@@ -6,11 +6,8 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from db import get_db, Audio, Track
-from schemas import Track, User, TokenData
-from security import authenticate_user, create_access_token
-from jwt import decode, DecodeError
-from security import SECRET_KEY, ALGORITHM
-from utils import get_user
+from schemas import Track, User
+from security import get_current_user
 
 router = APIRouter(
     prefix="/songs",
@@ -31,25 +28,6 @@ router = APIRouter(
 class SongRequest(BaseModel):
     limit: int = 10
     offset: int = 0
-
-async def get_current_user(token: str = Depends()):
-    credentials_exception = HTTPException(
-        status_code=401,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except DecodeError:
-        raise credentials_exception
-    user = get_user(username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
 
 @router.get("/list")
 async def get_songs(request: SongRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
