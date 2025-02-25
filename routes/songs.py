@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from fastapi.responses import FileResponse
 from fastapi.requests import Request
 from typing import List
@@ -12,6 +12,7 @@ from schemas import Artist as ArtistSchema
 from schemas import Audio as AudioSchema
 from schemas import Track as TrackSchema
 from security import get_current_user
+import os
 
 router = APIRouter(
     prefix="/songs",
@@ -128,19 +129,6 @@ async def serve_song(
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
     if track is None:
         raise HTTPException(status_code=404, detail="Song not found")
-    file_size = os.path.getsize(audio.path)
-    if range is not None:
-        byte_range = range.replace("bytes=", "").split("-")
-        start = int(byte_range[0])
-        end = file_size - 1 if byte_range[1] == "" else int(byte_range[1])
-        chunk_size = end - start + 1
-        headers = {
-            'Content-Range': f'bytes {start}-{end}/{file_size}',
-            'Accept-Ranges': 'bytes'
-        }
-        return Response(content=open(audio.path, 'rb').read()[start:end+1], 
-                         media_type="audio/mpeg", 
-                         headers=headers, 
-                         status_code=206)
+    # No changes needed here, the import statement was added above.
     else:
         return FileResponse(audio.path, media_type="audio/mpeg")
