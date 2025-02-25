@@ -5,6 +5,7 @@ from security import authenticate_user, create_access_token, get_current_user, g
 from security import authenticate_user_oauth2, create_access_token_oauth2, get_current_user_oauth2
 from datetime import timedelta
 from oauth2 import OAuth2RequestForm, OAuth2Token
+from db import User
 
 router = APIRouter(
     prefix="/auth",
@@ -36,6 +37,8 @@ async def login(request: LoginRequest):
         data={"sub": user.name}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+from fastapi.security import OAuth2PasswordRequestForm
 
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
