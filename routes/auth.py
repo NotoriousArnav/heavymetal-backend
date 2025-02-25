@@ -6,6 +6,9 @@ from security import authenticate_user_oauth2, create_access_token_oauth2, get_c
 from datetime import timedelta
 from oauth2 import OAuth2RequestForm, OAuth2Token
 from db import User
+from utils import get_password_hash
+from sqlalchemy.orm import Session
+from db import SessionLocal
 
 router = APIRouter(
     prefix="/auth",
@@ -50,6 +53,22 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
         data={"sub": user.name}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+class RegistrationRequest(BaseModel):
+    username: str
+    password: str
+
+@router.post("/register")
+async def register(request: RegistrationRequest):
+    user = get_user(request.username)
+    if user:
+        raise HTTPException(status_code=400, detail="Username already exists")
+    hashed_password = get_password_hash(request.password)
+    new_user = User(name=request.username, hashed_password=hashed_password)
+    db = SessionLocal()
+    db.add(new_user)
+    db.commit()
+    return {"message": "User created successfully"}
 
 @router.get("/profile")
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
