@@ -5,6 +5,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi import Depends
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
+from fastapi import HTTPException
 
 hasher = PasswordHasher()
 
@@ -29,6 +30,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, "secret_key", algorithm="HS256")
     return encoded_jwt
 
+def authenticate_user(username: str, password: str):
+    user = get_user(username)
+    if not user:
+        return False
+    if not verify_password(password, user.hashed_password):
+        return False
+    return user
+
 def get_current_user(token: str = Depends()):
     credentials_exception = HTTPBearer()
     try:
@@ -43,3 +52,13 @@ def get_current_user(token: str = Depends()):
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if not current_user.is_active:
+        raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+def get_current_active_superuser(current_user: User = Depends(get_current_active_user)):
+    if not current_user.is_superuser:
+        raise HTTPException(status_code=400, detail="Not a superuser")
+    return current_user
