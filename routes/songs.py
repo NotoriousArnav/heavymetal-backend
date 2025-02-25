@@ -119,6 +119,7 @@ async def search_songs_by_genre(
 @router.get("/serve/{song_id}")
 async def serve_song(
         song_id: str,
+        range: str = None,
         db: Session = Depends(get_db),
         current_user: User = Depends(get_current_user)
     ):
@@ -127,4 +128,19 @@ async def serve_song(
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
     if track is None:
         raise HTTPException(status_code=404, detail="Song not found")
-    return FileResponse(audio.path, media_type="audio/mpeg")
+    file_size = os.path.getsize(audio.path)
+    if range is not None:
+        byte_range = range.replace("bytes=", "").split("-")
+        start = int(byte_range[0])
+        end = file_size - 1 if byte_range[1] == "" else int(byte_range[1])
+        chunk_size = end - start + 1
+        headers = {
+            'Content-Range': f'bytes {start}-{end}/{file_size}',
+            'Accept-Ranges': 'bytes'
+        }
+        return Response(content=open(audio.path, 'rb').read()[start:end+1], 
+                         media_type="audio/mpeg", 
+                         headers=headers, 
+                         status_code=206)
+    else:
+        return FileResponse(audio.path, media_type="audio/mpeg")
