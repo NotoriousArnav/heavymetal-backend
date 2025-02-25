@@ -6,7 +6,7 @@ from security import authenticate_user_oauth2, create_access_token_oauth2, get_c
 from datetime import timedelta
 from oauth2 import OAuth2RequestForm, OAuth2Token
 from db import User
-from utils import get_password_hash
+from utils import get_password_hash, get_user
 from sqlalchemy.orm import Session
 from db import SessionLocal
 
