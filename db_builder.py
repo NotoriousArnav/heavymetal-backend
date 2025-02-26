@@ -20,10 +20,11 @@ from tqdm import tqdm  # For progress bars
 import concurrent.futures  # For parallel processing
 
 # Setup logging
+filename='/tmp/library_builder.log'
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='library_builder.log'
+    filename=filename
 )
 logger = logging.getLogger('HeavyMetal')
 
@@ -512,3 +513,4 @@ if __name__ == "__main__":
     else:
         log_and_print('OK', f"{MEDIA_FOLDER=}")
     main()
+    print(f"{CODES['OK']} Logs have been written to {filename}")
