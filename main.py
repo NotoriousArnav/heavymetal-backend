@@ -25,3 +25,13 @@ async def ping():
             "message": "pong",
             "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         }
+
+@app.post('/ping')
+async def pingPost(data: dict):
+    print(data)
+    # get any data
+    return {
+            "message": "pong",
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "data": data
+        }
