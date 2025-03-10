@@ -183,11 +183,11 @@ async def stream_song(
     track = db.query(Track).filter(Track.uuid == song_id).first()
     if not track:
         raise HTTPException(status_code=404, detail="Track not found")
-        
+
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
     if not audio or not audio.path:
         raise HTTPException(status_code=404, detail="Audio not found")
-        
+
     file_path = audio.path
 
     if not os.path.exists(file_path):
