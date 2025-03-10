@@ -24,3 +24,5 @@ test.db
 uvicorn.log
 
 .aider*
+.mypy_cache
+.ruff_cache

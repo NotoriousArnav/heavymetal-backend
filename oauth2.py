@@ -1,11 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel
-from utils import get_user, verify_password, get_password_hash
 from datetime import datetime, timedelta
+
+from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
+from pydantic import BaseModel
+
+from utils import get_user, verify_password
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/token")
+
 
 class OAuth2RequestForm(BaseModel):
     grant_type: str
@@ -13,9 +15,11 @@ class OAuth2RequestForm(BaseModel):
     password: str
     scope: str
 
+
 class OAuth2Token(BaseModel):
     access_token: str
     token_type: str
+
 
 def authenticate_user_oauth2(username: str, password: str):
     user = get_user(username)
@@ -24,6 +28,7 @@ def authenticate_user_oauth2(username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
 
 def create_access_token_oauth2(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()

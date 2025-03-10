@@ -9,11 +9,14 @@ dependencies = [
     "colorama>=0.4.6",
     "fastapi>=0.115.8",
     "mutagen>=1.47.0",
+    "pip>=25.0.1",
     "python-dotenv>=1.0.1",
     "python-jose>=3.4.0",
     "python-multipart>=0.0.20",
     "sqlalchemy>=2.0.38",
     "tqdm>=4.67.1",
+    "types-python-jose>=3.4.0.20250224",
+    "types-tqdm>=4.67.0.20250301",
     "uvicorn>=0.34.0",
 ]
 
@@ -22,5 +25,23 @@ heavymetal = "heavymetal.main:app"
 
 [dependency-groups]
 dev = [
+    "bandit>=1.8.3",
+    "mypy>=1.15.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.10",
     "tach>=0.26.1",
 ]
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "S", "B", "A", "C90", "SIM"]
+ignore = ["E501"]  # Ignore line length errors (handled by formatter)
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+

@@ -1,7 +1,9 @@
-from fastapi import FastAPI
 from datetime import datetime
-from routes import router
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from routes import router
 
 app = FastAPI(
     title="HeavyMetal Backend",
@@ -19,19 +21,18 @@ app.add_middleware(
 
 app.include_router(router)
 
-@app.get('/ping')
-async def ping():
-    return {
-            "message": "pong",
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
 
-@app.post('/ping')
+@app.get("/ping")
+async def ping():
+    return {"message": "pong", "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+
+
+@app.post("/ping")
 async def pingPost(data: dict):
     print(data)
     # get any data
     return {
-            "message": "pong",
-            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "data": data
-        }
+        "message": "pong",
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "data": data,
+    }

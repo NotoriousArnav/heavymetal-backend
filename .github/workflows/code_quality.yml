@@ -1,0 +1,30 @@
+name: Code Quality Checks
+
+on: [push, pull_request]
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Dependencies
+        run: pip install ruff mypy bandit pytest pytest-cov
+
+      - name: Run Linting (Ruff)
+        run: ruff check .
+
+      - name: Run Type Checking (Mypy)
+        run: mypy .
+
+      - name: Run Security Scan (Bandit)
+        run: bandit -r .
+
+      - name: Run Tests with Coverage
+        run: pytest --cov=app

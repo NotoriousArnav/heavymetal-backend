@@ -1,34 +1,34 @@
-from fastapi import APIRouter, Depends, HTTPException
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pydantic import BaseModel
-from security import authenticate_user, create_access_token, get_current_user, get_current_active_user, get_current_active_superuser
-from security import authenticate_user_oauth2, create_access_token_oauth2
 from datetime import timedelta
-from oauth2 import OAuth2RequestForm, OAuth2Token
-from db import User
+
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
+
+from db import SessionLocal, User
+from security import (
+    authenticate_user,
+    authenticate_user_oauth2,
+    create_access_token,
+    create_access_token_oauth2,
+    get_current_active_superuser,
+    get_current_active_user,
+)
 from utils import get_password_hash, get_user
-from sqlalchemy.orm import Session
-from db import SessionLocal
 
 router = APIRouter(
     prefix="/auth",
     tags=["Auth"],
     responses={
-        404: {
-                "description":"Not found"
-            },
-        500: {
-                "description":"Internal Server Error"
-            },
-        400: {
-                "description":"Bad Request"
-            },
-        },
+        404: {"description": "Not found"},
+        500: {"description": "Internal Server Error"},
+        400: {"description": "Bad Request"},
+    },
 )
+
 
 class LoginRequest(BaseModel):
     username: str
     password: str
+
 
 @router.post("/login")
 async def login(request: LoginRequest):
@@ -41,7 +41,9 @@ async def login(request: LoginRequest):
     )
     return {"access_token": access_token, "token_type": "Bearer"}
 
+
 from fastapi.security import OAuth2PasswordRequestForm
+
 
 @router.post("/token")
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -54,9 +56,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     )
     return {"access_token": access_token, "token_type": "Bearer"}
 
+
 class RegistrationRequest(BaseModel):
     username: str
     password: str
+
 
 @router.post("/register")
 async def register(request: RegistrationRequest):
@@ -70,9 +74,11 @@ async def register(request: RegistrationRequest):
     db.commit()
     return {"message": "User created successfully"}
 
+
 @router.get("/profile")
 async def read_users_me(current_user: User = Depends(get_current_active_user)):
     return {"username": current_user.name}
+
 
 @router.get("/superuser")
 async def read_superuser(current_user: User = Depends(get_current_active_superuser)):

@@ -1,14 +1,15 @@
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import Depends
-from jose import jwt, JWTError
 from datetime import datetime, timedelta
-from fastapi import HTTPException
-from utils import get_user, verify_password, get_password_hash
-from oauth2 import oauth2_scheme, authenticate_user_oauth2, create_access_token_oauth2
+
+from fastapi import Depends, HTTPException
+from jose import JWTError, jwt
+
 from db import User
+from oauth2 import oauth2_scheme
+from utils import get_user, verify_password
 
 SECRET_KEY = "secret_key"
 ALGORITHM = "HS256"
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
@@ -20,6 +21,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 def authenticate_user(username: str, password: str):
     user = get_user(username)
     if not user:
@@ -27,6 +29,7 @@ def authenticate_user(username: str, password: str):
     if not verify_password(password, user.hashed_password):
         return False
     return user
+
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -47,10 +50,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     return user
 
+
 def get_current_active_user(current_user: User = Depends(get_current_user)):
     if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
+
 
 def get_current_active_superuser(current_user: User = Depends(get_current_active_user)):
     if not current_user.is_superuser:
