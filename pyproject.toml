@@ -13,7 +13,7 @@ dependencies = [
     "python-dotenv>=1.0.1",
     "python-jose>=3.4.0",
     "python-multipart>=0.0.20",
-    "sqlalchemy>=2.0.38",
+    "sqlalchemy[mypy]>=2.0.38",
     "tqdm>=4.67.1",
     "types-python-jose>=3.4.0.20250224",
     "types-tqdm>=4.67.0.20250301",
@@ -25,6 +25,7 @@ heavymetal = "heavymetal.main:app"
 
 [dependency-groups]
 dev = [
+    "sqlalchemy[mypy]>=2.0.38",
     "bandit>=1.8.3",
     "mypy>=1.15.0",
     "pytest>=8.3.5",
@@ -44,3 +45,9 @@ ignore = ["E501", "B008", "N802", "C901", "N814"]  # Ignore line length errors (
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.bandit]
+exclude = "./.venv"
+
+[tool.mypy]
+plugins = "sqlalchemy.ext.mypy.plugin"

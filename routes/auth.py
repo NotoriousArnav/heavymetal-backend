@@ -7,9 +7,7 @@ from pydantic import BaseModel
 from db import SessionLocal, User
 from security import (
     authenticate_user,
-    authenticate_user_oauth2,
     create_access_token,
-    create_access_token_oauth2,
     get_current_active_superuser,
     get_current_active_user,
 )
@@ -38,20 +36,6 @@ async def login(request: LoginRequest):
         raise HTTPException(status_code=401, detail="Invalid username or password")
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token(
-        data={"sub": user.name}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "Bearer"}
-
-
-
-
-@router.post("/token")
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user_oauth2(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid username or password")
-    access_token_expires = timedelta(minutes=30)
-    access_token = create_access_token_oauth2(
         data={"sub": user.name}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "Bearer"}

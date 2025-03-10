@@ -26,7 +26,7 @@ jobs:
         run: uv run mypy .
 
       - name: Run Security Scan (Bandit)
-        run: uv run bandit -r .
+        run: uv run bandit --exclude "./.venv" -r .
 
       - name: Run Tests with Coverage
         run: uv run pytest --cov=app

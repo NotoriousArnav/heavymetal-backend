@@ -7,6 +7,7 @@ import uuid
 
 from sqlalchemy import Boolean, Column, ForeignKey, String, create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm.decl_api import DeclarativeMeta
 
 SQLALCHEMY_DATABASE_URL = os.getenv("SQLALCHEMY_DATABASE_URL", "sqlite:///./db.sqlite3")
 
@@ -15,7 +16,7 @@ engine = create_engine(
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-Base = declarative_base()
+Base:DeclarativeMeta = declarative_base()
 
 
 def get_db():

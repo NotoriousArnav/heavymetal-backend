@@ -49,15 +49,6 @@ logger = logging.getLogger("HeavyMetal")
 load_dotenv()
 init(autoreset=True)
 
-MEDIA_FOLDER = Path(os.getenv("MEDIA_FOLDER", None))
-BATCH_SIZE = int(
-    os.getenv("BATCH_SIZE", "100")
-)  # Number of files to process before committing
-MAX_WORKERS = int(
-    os.getenv("MAX_WORKERS", "4")
-)  # Number of parallel workers for metadata extraction
-CHECKPOINT_FILE = "library_builder_checkpoint.txt"
-
 CODES = {
     "OK": f"[{Fore.GREEN}+{Style.RESET_ALL}]",
     "INFO": f"[{Fore.BLUE}-{Style.RESET_ALL}]",
@@ -66,8 +57,8 @@ CODES = {
 }
 
 # Cache for artists and albums to reduce database queries
-artist_cache = {}
-album_cache = {}
+artist_cache:dict = {}
+album_cache:dict = {}
 
 
 def log_and_print(level: str, message: str) -> None:
@@ -87,6 +78,21 @@ def log_and_print(level: str, message: str) -> None:
     elif level == "ERROR":
         logger.error(message)
 
+if os.getenv("MEDIA_FOLDER"):
+    MEDIA_FOLDER = Path(
+        os.getenv("MEDIA_FODLER", "")
+    )
+else:
+    log_and_print("ERROR", "MEDIA_FOLDER env variable is not set")
+    exit(1)
+
+BATCH_SIZE = int(
+    os.getenv("BATCH_SIZE", "100")
+)  # Number of files to process before committing
+MAX_WORKERS = int(
+    os.getenv("MAX_WORKERS", "4")
+)  # Number of parallel workers for metadata extraction
+CHECKPOINT_FILE = "library_builder_checkpoint.txt"
 
 def traverse_directory(
     path: Path, filter_: Optional[Callable[[Path], bool]] = None
@@ -268,7 +274,7 @@ def parseAudioMetadata(path: Path) -> Dict[str, Any]:
     return metadata
 
 
-def get_or_create_artist(session, artist_name: str) -> Tuple[str, bool]:
+def get_or_create_artist(session, artist_name: str) -> Tuple[str, bool] | Tuple[None, bool]:
     """
     Gets or creates an artist in the database
 
@@ -303,7 +309,7 @@ def get_or_create_artist(session, artist_name: str) -> Tuple[str, bool]:
     return artist_uuid, True
 
 
-def get_or_create_album(session, album_name: str) -> Tuple[str, bool]:
+def get_or_create_album(session, album_name: str) -> Tuple[str, bool] | Tuple[None, bool]:
     """
     Gets or creates an album in the database
 

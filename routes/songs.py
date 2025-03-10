@@ -46,7 +46,6 @@ async def get_songs(
     ]
     return tracks
 
-
 @router.get("/info/{song_id}")
 async def get_song_info(
     song_id: str,
@@ -54,26 +53,28 @@ async def get_song_info(
     current_user: User = Depends(get_current_user),
 ):
     track = db.query(Track).filter(Track.uuid == song_id).first()
+    if track is None:
+        raise HTTPException(status_code=404, detail="Song not found")
+
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
     album = db.query(Album).filter(Album.uuid == track.album).first()
     artist = db.query(Artist).filter(Artist.uuid == track.artist).first()
-    if track is None:
-        raise HTTPException(status_code=404, detail="Song not found")
-    return TrackSchema(
-        uuid=track.uuid,
-        name=track.name,
-        album=AlbumSchema(
-            name=album.name,
-        ),
-        artist=ArtistSchema(
-            name=artist.name,
-        ),
-        audio=AudioSchema(
-            name=audio.name,
-            path=audio.path,
-        ),
-        genre=track.genre if track.genre is not None else "",
+
+    # Handle cases where related entities are None
+    album_name = album.name if album else "Unknown Album"
+    artist_name = artist.name if artist else "Unknown Artist"
+    audio_name = audio.name if audio else "Unknown Audio"
+    audio_path = audio.path if audio else ""
+
+    return_val:TrackSchema = TrackSchema(
+        name=track.name or "",
+        album=AlbumSchema(name=album_name or ""),
+        artist=ArtistSchema(name=artist_name or ""),
+        audio=AudioSchema(name=audio_name or "", path=audio_path or ""),
+        genre=track.genre or "",
     )
+
+    return return_val
 
 
 @router.get("/list/albums", response_model=List[SearchResult])
@@ -180,7 +181,13 @@ async def stream_song(
     current_user: User = Depends(get_current_user),
 ):
     track = db.query(Track).filter(Track.uuid == song_id).first()
+    if not track:
+        raise HTTPException(status_code=404, detail="Track not found")
+        
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
+    if not audio or not audio.path:
+        raise HTTPException(status_code=404, detail="Audio not found")
+        
     file_path = audio.path
 
     if not os.path.exists(file_path):
@@ -211,5 +218,11 @@ async def stream_song(
     }
 
     return StreamingResponse(
-        iter_file(file_path, start, end), status_code=206, headers=headers
+        iter_file(
+                file_path,
+                start,
+                end
+            ),
+        status_code=206,
+        headers=headers
     )
