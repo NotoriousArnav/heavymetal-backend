@@ -39,9 +39,8 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "S", "B", "A", "C90", "SIM"]
-ignore = ["E501"]  # Ignore line length errors (handled by formatter)
+ignore = ["E501", "B008", "N802", "C901", "N814"]  # Ignore line length errors (handled by formatter)
 
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
-

@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
 from db import SessionLocal, User
@@ -42,7 +43,6 @@ async def login(request: LoginRequest):
     return {"access_token": access_token, "token_type": "Bearer"}
 
 
-from fastapi.security import OAuth2PasswordRequestForm
 
 
 @router.post("/token")

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 
 from fastapi import Depends, HTTPException
@@ -7,8 +8,7 @@ from db import User
 from oauth2 import oauth2_scheme
 from utils import get_user, verify_password
 
-SECRET_KEY = "secret_key"
-ALGORITHM = "HS256"
+SECRET_KEY, ALGORITHM = os.getenv("SECRET_KEY", "secret_key"), "HS256"
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
@@ -43,8 +43,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         if username is None:
             raise credentials_exception
         token_data = username
-    except JWTError:
-        raise credentials_exception
+    except JWTError as e:
+        raise credentials_exception from e
     user = get_user(username=token_data)
     if user is None:
         raise credentials_exception

@@ -1,4 +1,5 @@
 import os
+import re
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -178,19 +179,6 @@ async def stream_song(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    """
-    NOTE: This is a streaming endpoint
-    This endpoint is cursed, (but it works somehow, hail satan or god, i dunno, I am atheist and i know it works)
-    The working implementation on how to use this in the frontend is given in `$PROJECT_ROOT/stream_audio_example.html`.
-    I tried this endpoint with curl too and like this:
-    ```bash
-     curl -X 'GET' \
-  'http://127.0.0.1:8080/api/v1/songs/stream/{SONG_ID}' \\   
-  -H 'accept: application/json' \
-  -H 'Authorization: Bearer TOKEN_HERE' | ffplay -
-    ```
-    and it works!
-    """
     track = db.query(Track).filter(Track.uuid == song_id).first()
     audio = db.query(Audio).filter(Audio.uuid == track.audio).first()
     file_path = audio.path

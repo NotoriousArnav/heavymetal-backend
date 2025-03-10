@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import tempfile
 import time
 import uuid
 from pathlib import Path
@@ -17,8 +18,27 @@ from tqdm import tqdm  # For progress bars
 
 import db
 
+# Define a type alias for audio file classes
+AudioFile = Union[MP3, FLAC, WAV, OGG]
+
+# Mapping of file extensions to their corresponding classes
+EXTENSION_MAP: dict[str, Callable[[Path], AudioFile]] = {
+    ".mp3": MP3,
+    ".flac": FLAC,
+    ".wv": WAV,
+    ".ogg": OGG,
+}
+
+
 # Setup logging
-filename = "/tmp/library_builder.log"
+filename = os.getenv(
+    "LOGFILE",
+    os.path.join(
+        tempfile.gettempdir(),
+        "library_builder.log"
+    )
+)
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -68,8 +88,8 @@ def log_and_print(level: str, message: str) -> None:
         logger.error(message)
 
 
-def traverseDirectory(
-    path: Path, filter: Optional[Callable[[Path], bool]] = None
+def traverse_directory(
+    path: Path, filter_: Optional[Callable[[Path], bool]] = None
 ) -> Generator[Path, None, None]:
     """
     Recursively traverses a directory and yields files one by one
@@ -84,10 +104,9 @@ def traverseDirectory(
     try:
         for entry in path.iterdir():
             if entry.is_dir():
-                yield from traverseDirectory(entry, filter)
-            elif entry.is_file():
-                if filter is None or filter(entry):
-                    yield entry
+                yield from traverse_directory(entry, filter_)
+            elif entry.is_file() and (filter_ is None or filter_(entry)):
+                yield entry
     except PermissionError:
         log_and_print("WARNING", f"Permission denied accessing {path}")
     except Exception as e:
@@ -117,42 +136,72 @@ def isAudioFile(path: Path) -> bool:
         return False
 
 
-def checkFormat(path: Path) -> Union[MP3, FLAC, WAV, OGG, None]:
+def check_format(path: Path) -> Optional[AudioFile]:
     """
-    Will check if the file is FLAC, M4A, MP3, WAV, OGG, etc
+    Check if the file is FLAC, MP3, WAV, OGG, etc.
 
     Args:
         path (Path): The file to check
+
+    Returns:
+        An instance of the corresponding audio file class or None if unsupported.
     """
     try:
-        # Try to identify by extension first (faster)
+        # Identify by extension
         ext = path.suffix.lower()
-        if ext == ".mp3":
-            return MP3(path)
-        elif ext == ".flac":
-            return FLAC(path)
-        elif ext == ".wav":
-            return WAV(path)
-        elif ext == ".ogg":
-            return OGG(path)
+        if ext in EXTENSION_MAP:
+            return EXTENSION_MAP[ext](path)
 
-        # Fall back to mime type detection
+        # Fall back to MIME type detection
         f = File(path)
         if not f:
             return None
-        if "mp3" in "".join(f.mime):
-            return MP3(path)
-        elif "wav" in "".join(f.mime):
-            return WAV(path)
-        elif "ogg" in "".join(f.mime):
-            return OGG(path)
-        elif "flac" in "".join(f.mime):
-            return FLAC(path)
-        else:
-            return None
+        mime_type = "".join(f.mime)
+        for ext, cls in EXTENSION_MAP.items():
+            if ext.strip('.') in mime_type:
+                return cls(path)
+        return None
     except Exception as e:
         logger.error(f"Error checking format for {path}: {e}")
         return None
+
+
+# def check_format(path: Path) -> Union[MP3, FLAC, WAV, OGG, None]:
+#     """
+#     Will check if the file is FLAC, M4A, MP3, WAV, OGG, etc
+
+#     Args:
+#         path (Path): The file to check
+#     """
+#     try:
+#         # Try to identify by extension first (faster)
+#         ext = path.suffix.lower()
+#         if ext == ".mp3":
+#             return MP3(path)
+#         elif ext == ".flac":
+#             return FLAC(path)
+#         elif ext == ".wav":
+#             return WAV(path)
+#         elif ext == ".ogg":
+#             return OGG(path)
+
+#         # Fall back to mime type detection
+#         f = File(path)
+#         if not f:
+#             return None
+#         if "mp3" in "".join(f.mime):
+#             return MP3(path)
+#         elif "wav" in "".join(f.mime):
+#             return WAV(path)
+#         elif "ogg" in "".join(f.mime):
+#             return OGG(path)
+#         elif "flac" in "".join(f.mime):
+#             return FLAC(path)
+#         else:
+#             return None
+#     except Exception as e:
+#         logger.error(f"Error checking format for {path}: {e}")
+#         return None
 
 
 def parseAudioMetadata(path: Path) -> Dict[str, Any]:
@@ -177,7 +226,7 @@ def parseAudioMetadata(path: Path) -> Dict[str, Any]:
     }
 
     try:
-        audio_file = checkFormat(path)
+        audio_file = check_format(path)
         if not audio_file:
             logger.warning(f"Could not parse metadata for {path}")
             return metadata
@@ -444,16 +493,14 @@ def main():
         # Process files
         log_and_print("INFO", f"Scanning {MEDIA_FOLDER} for audio files...")
 
-        file_generator = traverseDirectory(MEDIA_FOLDER, filter=isAudioFile)
+        file_generator = traverse_directory(MEDIA_FOLDER, filter_=isAudioFile)
 
         # Skip files until checkpoint if resuming
         if last_processed:
-            skip_count = 0
-            for file_path in file_generator:
-                skip_count += 1
+            for i, file_path in enumerate(file_generator):
                 if str(file_path.absolute()) == last_processed:
                     log_and_print(
-                        "OK", f"Skipped {skip_count} previously processed files"
+                        "OK", f"Skipped {i+1} previously processed files"
                     )
                     break
 
