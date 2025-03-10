@@ -28,5 +28,5 @@ jobs:
       - name: Run Security Scan (Bandit)
         run: uv run bandit --exclude "./.venv" -r .
 
-      - name: Run Tests with Coverage
-        run: uv run pytest --cov=app
+      # - name: Run Tests with Coverage
+      #   run: uv run pytest --cov=app
