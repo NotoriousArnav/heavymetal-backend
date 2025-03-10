@@ -15,6 +15,7 @@ dependencies = [
     "python-multipart>=0.0.20",
     "sqlalchemy[mypy]>=2.0.38",
     "tqdm>=4.67.1",
+    "types-colorama>=0.4.15.20240311",
     "types-python-jose>=3.4.0.20250224",
     "types-tqdm>=4.67.0.20250301",
     "uvicorn>=0.34.0",
