@@ -1,4 +1,4 @@
-name: Code Quality Checks
+name: CI - Code Quality & Testing
 
 on: [push, pull_request]
 
@@ -15,16 +15,18 @@ jobs:
           python-version: "3.11"
 
       - name: Install Dependencies
-        run: pip install ruff mypy bandit pytest pytest-cov
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          uv sync
 
       - name: Run Linting (Ruff)
-        run: ruff check .
+        run: uv run ruff check .
 
       - name: Run Type Checking (Mypy)
-        run: mypy .
+        run: uv run mypy .
 
       - name: Run Security Scan (Bandit)
-        run: bandit -r .
+        run: uv run bandit -r .
 
       - name: Run Tests with Coverage
-        run: pytest --cov=app
+        run: uv run pytest --cov=app
